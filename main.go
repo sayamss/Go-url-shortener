@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,8 @@ var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 type url struct {
 	gorm.Model
-	url       string
-	shortened string
+	URL string
+	Key string
 }
 
 func initMigration() {
@@ -43,19 +44,31 @@ func generateKey() string {
 	return string(key)
 }
 
-func addURL(RecURL string) {
+func addURL(RecURL string) string {
 
 	var randomKey = generateKey()
-	var shortenedURL string = "sigh.gq/" + randomKey
 
-	println(shortenedURL)
+	println(randomKey)
+	println(RecURL)
+	db.Create(&url{URL: RecURL, Key: randomKey})
 
-	db.Create(&url{url: RecURL, shortened: shortenedURL})
-
+	var shortened string = "sigh.gq/" + randomKey
+	return shortened
 }
 
 func createURL(c *gin.Context) {
 
+	requestURL := c.PostForm("url")
+	shortenedURL := addURL(requestURL)
+
+	c.JSON(201, gin.H{
+		"status":   "shortened link",
+		"url":      shortenedURL,
+		"original": requestURL})
+}
+
+func home(c *gin.Context) {
+	c.HTML(http.StatusOK, "home.html", nil)
 }
 
 func main() {
@@ -63,14 +76,10 @@ func main() {
 	initMigration()
 
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/css", "templates/css")
 
-	r.GET("/", func(c *gin.Context) {
-		var randomKey = generateKey()
-		c.JSON(200, gin.H{
-			"status": randomKey,
-		})
-	})
-
+	r.GET("/", home)
 	r.POST("/add", createURL)
 
 	r.Run()
