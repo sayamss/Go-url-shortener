@@ -76,8 +76,8 @@ func main() {
 	initMigration()
 
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/css", "templates/css")
+	r.LoadHTMLGlob("templates/html/*")
+	r.Static("/css", "templates/css/")
 
 	r.GET("/", home)
 	r.POST("/add", createURL)
