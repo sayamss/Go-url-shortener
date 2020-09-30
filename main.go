@@ -24,6 +24,10 @@ type url struct {
 	Key string
 }
 
+type link struct {
+	url string
+}
+
 func initMigration() {
 
 	db, err = gorm.Open(sqlite.Open("urls.db"), &gorm.Config{})
@@ -58,7 +62,13 @@ func addURL(RecURL string) string {
 
 func createURL(c *gin.Context) {
 
-	requestURL := c.PostForm("url")
+	//requestURL := body[1]
+	buf := make([]byte, 1024)
+	num, _ := c.Request.Body.Read(buf)
+	reqBody := string(buf[0:num])
+
+	requestURL := reqBody[4:]
+
 	shortenedURL := addURL(requestURL)
 
 	c.JSON(201, gin.H{
