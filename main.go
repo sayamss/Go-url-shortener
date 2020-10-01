@@ -52,8 +52,6 @@ func addURL(RecURL string) string {
 
 	var randomKey = generateKey()
 
-	println(randomKey)
-	println(RecURL)
 	db.Create(&url{URL: RecURL, Key: randomKey})
 
 	var shortened string = "sigh.gq/" + randomKey
@@ -81,6 +79,11 @@ func home(c *gin.Context) {
 	c.HTML(http.StatusOK, "home.html", nil)
 }
 
+func redirect(c *gin.Context) {
+	path := c.Request.URL.Path
+	println(path)
+}
+
 func main() {
 
 	initMigration()
@@ -89,8 +92,9 @@ func main() {
 	r.LoadHTMLGlob("templates/html/*")
 	r.Static("/css", "templates/css/")
 
-	r.GET("/", home)
+	r.GET("/home", home)
 	r.POST("/add", createURL)
+	r.Any("*")
 
 	r.Run()
 }
