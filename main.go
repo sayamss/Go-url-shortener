@@ -80,8 +80,13 @@ func home(c *gin.Context) {
 }
 
 func redirect(c *gin.Context) {
-	path := c.Request.URL.Path
-	println(path)
+
+	para := c.Param("para")
+	var URL url
+	db.Where("Key = ?", para).First(&URL)
+
+	c.Redirect(http.StatusPermanentRedirect, URL.URL)
+
 }
 
 func main() {
@@ -89,12 +94,17 @@ func main() {
 	initMigration()
 
 	r := gin.Default()
+
 	r.LoadHTMLGlob("templates/html/*")
-	r.Static("/css", "templates/css/")
-
-	r.GET("/home", home)
+	//r.Static("css/", "templates/css/")
+	r.GET("/", home)
+	r.GET("/:para", redirect)
 	r.POST("/add", createURL)
-	r.Any("*")
+	/*
+		r.GET("/home", home)
+		r.POST("/add", createURL)
 
+		r.NoRoute(redirect)
+	*/
 	r.Run()
 }
