@@ -82,11 +82,12 @@ func home(c *gin.Context) {
 func redirect(c *gin.Context) {
 
 	para := c.Param("para")
+	println(para)
 	var URL url
 	db.Where("Key = ?", para).First(&URL)
 
-	c.Redirect(http.StatusPermanentRedirect, URL.URL)
-
+	c.Redirect(302, URL.URL)
+	c.Abort()
 }
 
 func main() {
